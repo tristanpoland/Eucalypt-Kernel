@@ -23,7 +23,7 @@ use limine::request::{
 };
 
 // Hardware
-use serial::serial_println;
+use framebuffer::println;
 
 use bare_x86_64::cpu::apic::{
     enable_apic,
@@ -117,7 +117,7 @@ extern "C" fn kmain() -> ! {
         framebuffer.bpp() as usize,
         FONT,
     );
-    serial_println!("eucalyptOS Starting...");
+    println!("eucalyptOS Starting...");
 
     let memmap_response = MEMMAP_REQUEST
         .get_response()
@@ -144,39 +144,39 @@ extern "C" fn kmain() -> ! {
     let mp_response = MP_REQUEST.get_response().expect("No MP response from Limine");
     init_mp(mp_response);
 
-    serial_println!("Initializing FAT12 filesystem...");
+    println!("Initializing FAT12 filesystem...");
     match fat12_init(0) {
         Ok(_) => {
-            serial_println!("FAT12 initialized successfully");
+            println!("FAT12 initialized successfully");
             let data = b"Hello, World";
             match fat12_create_file("hello.txt", data) {
                 Ok(_) => {
-                    serial_println!("Created hello.txt");
+                    println!("Created hello.txt");
                     match fat12_read_file("hello.txt") {
                         Ok(content) => {
                             let content_str = core::str::from_utf8(&content).unwrap_or("Invalid UTF-8");
-                            serial_println!("File content: {}", content_str);
+                            println!("File content: {}", content_str);
                         }
-                        Err(e) => serial_println!("Failed to read file: {}", e),
+                        Err(e) => println!("Failed to read file: {}", e),
                     }
                 }
-                Err(e) => serial_println!("Failed to create file: {}", e),
+                Err(e) => println!("Failed to create file: {}", e),
             }
         }
         Err(e) => {
-            serial_println!("FAT12 initialization failed: {}", e);
-            serial_println!("This is expected if the disk is not formatted as FAT12");
+            println!("FAT12 initialization failed: {}", e);
+            println!("This is expected if the disk is not formatted as FAT12");
         }
     }
 
     let kernel_main_rsp: u64;
-    serial_println!("Getting RSP");
+    println!("Getting RSP");
     unsafe {
         asm!("mov {}, rsp", out(reg) kernel_main_rsp);
     }
-    serial_println!("Kernel RSP: {}", kernel_main_rsp);
+    println!("Kernel RSP: {}", kernel_main_rsp);
     init_kernel_process(kernel_main_rsp);
-    serial_println!("Creating Processes");
+    println!("Creating Processes");
     create_process(test_process_1 as *mut ()).expect("Failed to create process 1");
     create_process(test_process_2 as *mut ()).expect("Failed to create process 2");
     init_scheduler();
@@ -191,18 +191,19 @@ extern "C" fn kmain() -> ! {
 
 fn test_process_1() {
     loop {
-        serial_println!("Process 1 running");
+        println!("Process 1 running");
         sleep_proc_ms(1000);
     }
 }
 
 fn test_process_2() {
     loop {
-        serial_println!("Process 2 running");
+        println!("Process 2 running");
         sleep_proc_ms(1000);
     }
 }
 
+#[cfg(not(test))]
 #[panic_handler]
 fn rust_panic(info: &core::panic::PanicInfo) -> ! {
     let (rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp): (u64, u64, u64, u64, u64, u64, u64, u64);

@@ -1,7 +1,7 @@
 use core::fmt;
 use ide::IDE_DEVICES;
 
-use serial::serial_println;
+use framebuffer::println;
 
 /// Superblock structure
 pub struct SuperBlock {
@@ -37,7 +37,7 @@ impl SuperBlock {
         let size_bytes = sector_count * Self::SECTOR_SIZE;
         
         if size_bytes == 0 {
-            serial_println!("Warning: Drive {} has size 0", drive);
+            println!("Warning: Drive {} has size 0", drive);
         }
         
         let block_size = Self::calculate_block_size(size_bytes);

@@ -7,7 +7,7 @@ edition = "2024"
 limine = { workspace = true }
 x86_64 = { workspace = true }
 uart_16550 = { workspace = true }
-serial = { workspace = true }
+framebuffer =  { workspace = true }
 ide = { workspace = true}
 eucalypt_fs = { workspace = true }
 ahci = { workspace = true }
@@ -18,7 +18,6 @@ process = { workspace = true }
 memory = { workspace = true }
 usb = { workspace = true }
 syscall = { workspace = true }
-framebuffer = { workspace = true }
 fat12 = { workspace = true }
 
 pic8259 = "0.11.0"

@@ -7,7 +7,7 @@ extern crate alloc;
 
 use bare_x86_64::*;
 use core::sync::atomic::{AtomicBool, Ordering};
-use serial::serial_println;
+use framebuffer::println;
 
 const ATA_SR_BSY: u8 = 0x80;
 const ATA_SR_DF: u8 = 0x20;
@@ -340,54 +340,54 @@ fn ide_print_error(drive: usize, mut err: u8) -> u8 {
         return err;
     }
 
-    serial_println!("IDE:");
+    println!("IDE:");
     
     if err == 1 {
-        serial_println!("- Device Fault");
+        println!("- Device Fault");
         err = 19;
     } else if err == 2 {
         let st = ide_read(unsafe { IDE_DEVICES }[drive].channel, ATA_REG_ERROR);
         if st & ATA_ER_AMNF != 0 {
-            serial_println!("- No Address Mark Found");
+            println!("- No Address Mark Found");
             err = 7;
         }
         if st & ATA_ER_TK0NF != 0 {
-            serial_println!("- No Media or Media Error");
+            println!("- No Media or Media Error");
             err = 3;
         }
         if st & ATA_ER_ABRT != 0 {
-            serial_println!("- Command Aborted");
+            println!("- Command Aborted");
             err = 20;
         }
         if st & ATA_ER_MCR != 0 {
-            serial_println!("- No Media or Media Error");
+            println!("- No Media or Media Error");
             err = 3;
         }
         if st & ATA_ER_IDNF != 0 {
-            serial_println!("- ID mark not Found");
+            println!("- ID mark not Found");
             err = 21;
         }
         if st & ATA_ER_MC != 0 {
-            serial_println!("- No Media or Media Error");
+            println!("- No Media or Media Error");
             err = 3;
         }
         if st & ATA_ER_UNC != 0 {
-            serial_println!("- Uncorrectable Data Error");
+            println!("- Uncorrectable Data Error");
             err = 22;
         }
         if st & ATA_ER_BBK != 0 {
-            serial_println!("- Bad Sectors");
+            println!("- Bad Sectors");
             err = 13;
         }
     } else if err == 3 {
-        serial_println!("- Reads Nothing");
+        println!("- Reads Nothing");
         err = 23;
     } else if err == 4 {
-        serial_println!("- Write Protected");
+        println!("- Write Protected");
         err = 8;
     }
 
-    serial_println!(
+    println!(
         "- [{} {}] {}",
         ["Primary", "Secondary"][unsafe { IDE_DEVICES }[drive].channel as usize],
         ["Master", "Slave"][unsafe { IDE_DEVICES }[drive].drive as usize],
@@ -650,7 +650,7 @@ fn ide_detect_device(channel: usize, drive: usize) -> bool {
                         0,
                         0,
                     ]);
-                    serial_println!(
+                    println!(
                         "Device {}: LBA48, Size: {} sectors",
                         drive_index, IDE_DEVICES[drive_index].size
                     );
@@ -665,7 +665,7 @@ fn ide_detect_device(channel: usize, drive: usize) -> bool {
                         0,
                         0,
                     ]);
-                    serial_println!(
+                    println!(
                         "Device {}: LBA28, Size: {} sectors",
                         drive_index, IDE_DEVICES[drive_index].size
                     );
@@ -743,9 +743,9 @@ pub fn ide_init(bar0: u8, bar1: u8, bar2: u8, bar3: u8, bar4: u8) {
 
         let count = COUNT;
         if count == 0 {
-            serial_println!("IDE: No devices found");
+            println!("IDE: No devices found");
         } else {
-            serial_println!("IDE: devices detected: {}", count);
+            println!("IDE: devices detected: {}", count);
         }
     }
     

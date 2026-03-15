@@ -8,7 +8,7 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::sync::atomic::{AtomicBool, Ordering};
 use ide::{ide_read_sectors, ide_write_sectors};
-use serial::serial_println;
+use framebuffer::println;
 
 const SECTOR_SIZE: usize = 512;
 const FAT12_EOF: u16 = 0xFF8;
@@ -209,12 +209,12 @@ impl DirectoryEntry {
 pub fn fat12_init(drive: usize) -> Result<(), &'static str> {
     fat_lock();
     
-    serial_println!("FAT12: Reading boot sector from drive {}...", drive);
+    println!("FAT12: Reading boot sector from drive {}...", drive);
     
     let mut boot_sector = [0u8; SECTOR_SIZE];
     let err = ide_read_sectors(drive, 0, &mut boot_sector);
     
-    serial_println!("FAT12: Boot sector read returned error code: {}", err);
+    println!("FAT12: Boot sector read returned error code: {}", err);
     
     if err != 0 {
         fat_unlock();
@@ -228,9 +228,9 @@ pub fn fat12_init(drive: usize) -> Result<(), &'static str> {
     let bytes_per_sector = bpb.bytes_per_sector;
     let fs_type = bpb.fs_type;
     
-    serial_println!("Boot sector signature: 0x{:02x}{:02x}", boot_sig_0, boot_sig_1);
-    serial_println!("Bytes per sector: {}", bytes_per_sector);
-    serial_println!("FS Type: {:?}", core::str::from_utf8(&fs_type));
+    println!("Boot sector signature: 0x{:02x}{:02x}", boot_sig_0, boot_sig_1);
+    println!("Bytes per sector: {}", bytes_per_sector);
+    println!("FS Type: {:?}", core::str::from_utf8(&fs_type));
 
     if boot_sig_0 != 0x55 || boot_sig_1 != 0xAA {
         fat_unlock();
